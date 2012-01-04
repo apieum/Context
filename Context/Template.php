@@ -35,7 +35,7 @@ class Context_Template
 {
     protected $getter;
     protected $container;
-    protected $globalPattern = '@(?<!\\\)\{(?<datas>([^{}]+ | (?R))*)(?<!\\\)\}@xm';
+    protected $globalPattern = '@(?<!\\\)\{(?<datas>([^{}]+ | (?R)))(?<!\\\)\}@xm';
     protected $strictPattern = '@^((?<!\\\)\{)(?<datas>[^{}]+)((?<!\\\)\})$@xm';
     /**
      * Constructor
@@ -116,11 +116,14 @@ class Context_Template
     {
         if (preg_match($this->strictPattern, $datas, $match)) {
             return $this->replace($match);
+        }
+        $return = preg_replace_callback(
+            $this->globalPattern, array($this, 'replace'), $datas
+        );
+        if ($return !== $datas) {
+            return $this->apply($return);
         } else {
-            return 
-                preg_replace_callback(
-                    $this->globalPattern, array($this, 'replace'), $datas
-                );
+            return $return;
         }
     }
     /**

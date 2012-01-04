@@ -122,12 +122,15 @@ abstract class Context_Behaviours_Abstract extends Context_Abstract
             return $this->normalize(
                 call_user_func_array($behaviour, $this->normalize($args))
             );
-        } else {
-            $behaviour = new ReflectionClass($behaviour);
-            return $this->normalize(
-                $behaviour->newInstanceArgs($this->normalize($args))
-            );
         }
+        // else create an object :
+        $behaviour = new ReflectionClass($behaviour);
+        if ($args !== array() && is_object($behaviour->getConstructor())) {
+            $object = $behaviour->newInstanceArgs($this->normalize($args));
+        } else {
+            $object = $behaviour->newInstance();
+        }
+        return $this->normalize($object);
     }
 
     /**

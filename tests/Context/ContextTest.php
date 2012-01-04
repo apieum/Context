@@ -443,7 +443,37 @@ class ContextTest extends PHPUnit_Framework_TestCase
         $this->assertFalse($this->context->isClass('behaviour'));
         $this->assertTrue($this->context->isCallable('behaviour'));
     }
-    
+    /**
+     * descriptions can be recursives
+     * 
+     * @return @test 
+     */
+    public function recursivesDescriptionsCanBeUsedWithBehaviours()
+    {
+        $args1 = array(array(0,1,2));
+        $args2 = array(array(2,1,0));
+        $this->context->describe('arguments de "Array Object"', $args1);
+        $this->context->describe('arguments de "Fixed Array"', $args2);
+        $this->context->describe('arguments', '{arguments de "{object}"}');
+        $this->context->addBehaviour('Array Object', 'ArrayObject');
+        $this->context->addBehaviour('Fixed Array', array('SplFixedArray','fromArray'));
+        $this->context->describe('object', 'Array Object');
+        $this->assertEquals($args1, $this->context->about('arguments'));
+        $array1 = $this->context->proceed('{object}', '{arguments de "{object}"}');
+        $this->context->describe('object', 'Fixed Array');
+        $this->assertEquals($args2, $this->context->about('arguments'));
+        $array2 = $this->context->proceed('{object}', '{arguments}');
+        $this->assertNotEquals($array1, $array2);
+        try {
+            $array1[] = 3;
+            $array2[] = -1;
+        } catch (RuntimeException $e) {
+            $this->assertTrue(isset($array1[3]));
+            $this->assertFalse(isset($array2[3]));
+        }
+        $this->assertTrue(isset($e));
+        
+    }
 
 }
 ?>
