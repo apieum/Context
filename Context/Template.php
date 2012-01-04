@@ -117,14 +117,12 @@ class Context_Template
         if (preg_match($this->strictPattern, $datas, $match)) {
             return $this->replace($match);
         }
-        $return = preg_replace_callback(
-            $this->globalPattern, array($this, 'replace'), $datas
-        );
+        $method = array($this, 'replace');
+        $return = preg_replace_callback($this->globalPattern, $method, $datas);
         if ($return !== $datas) {
-            return $this->apply($return);
-        } else {
-            return $return;
+            $return = $this->apply($return);
         }
+        return $return;
     }
     /**
      * Return the replacement of the given matches
